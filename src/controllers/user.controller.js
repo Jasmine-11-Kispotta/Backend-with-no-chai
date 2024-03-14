@@ -224,4 +224,216 @@ const refreshAccessToken = asyncHandler(
         }
     }
 )
-export {registerUser, loginUser, logoutUser, refreshAccessToken}
+
+const changeCurrentPassword = asyncHandler(
+    async(req, res) =>{
+        const user = await User.findById(req.user?._id)
+        console.log(user)
+        const {oldPassword, newPassword} = req.body
+        
+        const passwordCorrect = await user.isPasswordCorrect(oldPassword)
+        console.log(passwordCorrect)
+        if(!passwordCorrect){
+            throw new ApiError(400, "incorrect Password")
+        }
+        
+        user.password = newPassword           //This change affects only the user object, not the original document in the database.
+        const updatedUser = await user.save({validateBeforeSave: false})   //saving the user object will change the original document in the database because the user object represents the document retrieved from the database and has the same _id. 
+
+        res.status(200).json(
+            new ApiResponse(200, updatedUser, "password changed successfully")
+        )
+    }
+)
+
+
+const getCurretUser = asyncHandler(
+    async (req, res) => {
+       res.status(200).json(
+        new ApiResponse(200, req.user, "fetched current user")
+       )
+    }
+)
+
+const updateUserDetails = asyncHandler(
+    async(req, res) => {
+        const {userName, fullName, email} = req.body
+
+        if(!userName && !fullName && !email){
+            throw new ApiError(400, "userName, fullname or email is required for updation!")
+        }
+        console.log(`${userName}, ${fullName}, ${email}`)
+        
+    
+        //we can update and save details this way but coz we are not updating password, this code will trigger the pre save method, which is written for encryption of password before saving, which will also take some time
+        //const user = await User.findById(req.user._id)
+        // if(userName){
+        //     user.userName = userName
+        // } 
+        // if(fullName)
+        //     user.fullName = fullName
+
+        // if(email)
+        //     user.email = email
+       
+        // const updatedUser = await user.save({validateBeforeSave: true})
+
+        console.log(`id = ${req.user}`)
+        let updatedUser ={}
+        console.log(`updateduser = ${updatedUser}`)
+        if(userName && fullName && email){
+            updatedUser = await User.findByIdAndUpdate(req.user?._id, 
+           {
+             $set: {
+                  userName: userName.toLowerCase(),
+                  fullName: fullName,
+                  email : email.toLowerCase()
+                 }
+           },
+           {
+            new: true
+           }).select("-password -refreshToken")
+        }
+        else if(userName && email){
+            updatedUser = await User.findByIdAndUpdate(req.user?._id, 
+                {
+                $set: {
+                 userName: userName,
+                 email,
+                  }
+                },
+                {
+                 new: true
+                }).select("-password -refreshToken")
+        }
+        else if(userName && fullName){
+            updatedUser = await User.findByIdAndUpdate(req.user?._id, 
+                {
+                $set: {
+                       userName: userName,
+                       fullName: fullName,
+                      }
+                },
+                {
+                 new: true
+                }).select("-password -refreshToken")
+        }
+        else if(fullName && email){
+            updatedUser = await User.findByIdAndUpdate(req.user?._id, 
+                {$set: {
+                           fullName: fullName,
+                           email
+                       }
+                },
+                {
+                    new: true
+                }
+            ).select("-password -refreshToken")
+        }
+        else if(fullName){
+            updatedUser = await User.findByIdAndUpdate(req.user?._id, 
+                {$set: {
+                           fullName: fullName
+                       }
+                },
+                {
+                    new: true
+                }
+            ).select("-password -refreshToken")
+        }
+        else if(email){
+            updatedUser = await User.findByIdAndUpdate(req.user?._id, 
+                {$set: {
+                           email
+                       }
+                },
+                {
+                    new: true
+                }
+            ).select("-password -refreshToken")
+        }
+        else if(userName){
+            updatedUser = await User.findByIdAndUpdate(req.user?._id, 
+                {$set: {
+                          userName
+                       }
+                },
+                {
+                    new: true
+                }
+            ).select("-password -refreshToken")
+        }
+        else{
+            throw new ApiError(500, "something went wrong")
+        }
+
+
+        res.status(200).json(
+        new ApiResponse(200, updatedUser, "successfully updated user details")
+    )
+    }
+)
+
+const updateAvatarOrCoverImage = asyncHandler(
+    async(req, res) =>{
+         const {avatar, coverImage} = req.files
+         if(!avatar && !coverImage)
+            throw new ApiError(400, "avatar or coverimage is required for updation")
+
+        const avatarUpdatedLocalPath = req.files?.avatar?.[0]?.path
+        const coverImageUpdatedLocalPath = req.files?.coverImage?.[0]?.path
+
+        let avatarUpdatedPath ={}, coverImageUpdatedPath = {}
+        if(avatarUpdatedLocalPath)
+            {avatarUpdatedPath = await uploadOnCloudinary(avatarUpdatedLocalPath)}
+        if(coverImageUpdatedLocalPath)
+           coverImageUpdatedPath = await uploadOnCloudinary(coverImageUpdatedLocalPath)
+
+        let updatedUser = {}
+        if(avatarUpdatedPath && coverImageUpdatedPath){
+            updatedUser = await User.findByIdAndUpdate(req.user._id, 
+              {
+                $set:{
+                    avatar: avatarUpdatedPath.url,
+                    coverImage: coverImageUpdatedPath.url
+                }
+              },
+              {
+                new: true
+              }
+            ).select('-password -refreshToken')
+        }
+        else if(avatarUpdatedPath){
+            updatedUser = await User.findByIdAndUpdate(req.user._id, 
+                {
+                  $set:{
+                    coverImage: coverImageUpdatedPath.url,
+                  }
+                },
+                {
+                    new: true
+                }
+              ).select('-password -refreshToken')
+        }
+        else if(coverImageUpdatedPath){
+            updatedUser = await User.findByIdAndUpdate(req.user._id, 
+                {
+                  $set:{
+                      avatar: avatarUpdatedPath.url,
+                  }
+                },
+                {
+                    new: true
+                }
+              ).select('-password -refreshToken')
+        }
+        else{
+            throw new ApiError(500, "error while uploading images")
+        }
+        
+        res.status(200).json(
+            new ApiResponse(200, updatedUser, "successfully updated images")
+        )
+    }
+)
+export {registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurretUser, updateUserDetails, updateAvatarOrCoverImage}

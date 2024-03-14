@@ -61,7 +61,7 @@ userSchema.pre("save", async function (next){
 // So, after the hashing operation, this.password and password refer to different objects. this.password points to the object containing the hashed data, and password (in the context of the middleware) still refers to the original plain text password. This allows the middleware to update the document's password field with the hashed value before saving it to the database.
 //This might happen due to the timing of the getter/setter mechanism.
 userSchema.methods.isPasswordCorrect = async function(password){
-    return await bcrypt.compare(password, this.password)
+    return await bcrypt.compare(password, this.password)           //bcrypt expects the stored password in the database to be hashed. 
 }
 
 userSchema.methods.generateAccessToken = function(){
