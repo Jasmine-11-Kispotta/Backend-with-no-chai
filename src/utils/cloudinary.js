@@ -1,6 +1,7 @@
 import {v2 as cloudinary} from 'cloudinary'  //sevice where we will store files, images and many more
 import fs from 'fs'    //for managing file system in nodejs
 
+
           
 
 const uploadOnCloudinary = async (localFilePath) => {
@@ -28,4 +29,18 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 }
 
-export {uploadOnCloudinary}
+const deleteFileOfCloudinary = async(fileUrl) =>{
+    const publicId = fileUrl?.split('/').pop().split('.')[0]
+    // console.log(publicId)
+
+    cloudinary.uploader.destroy(publicId, (error, result) => {
+        if(error){
+            console.log(error)
+        }
+        else(
+            console.log(result || "older file deleted successfully")
+        )
+    })
+}
+
+export {uploadOnCloudinary, deleteFileOfCloudinary}

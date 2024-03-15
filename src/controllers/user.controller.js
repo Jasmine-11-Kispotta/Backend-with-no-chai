@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.models.js";
-import {uploadOnCloudinary} from "../utils/cloudinary.js"
+import {uploadOnCloudinary, deleteFileOfCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
@@ -383,13 +383,18 @@ const updateAvatarOrCoverImage = asyncHandler(
         const avatarUpdatedLocalPath = req.files?.avatar?.[0]?.path
         const coverImageUpdatedLocalPath = req.files?.coverImage?.[0]?.path
 
-        let avatarUpdatedPath ={}, coverImageUpdatedPath = {}
-        if(avatarUpdatedLocalPath)
-            {avatarUpdatedPath = await uploadOnCloudinary(avatarUpdatedLocalPath)}
-        if(coverImageUpdatedLocalPath)
+        let avatarUpdatedPath ="", coverImageUpdatedPath = "", updatedUser = {}, oldAvatar = "", oldCoverImage = ""
+        if(avatarUpdatedLocalPath){
+            avatarUpdatedPath = await uploadOnCloudinary(avatarUpdatedLocalPath)
+            oldAvatar = req.user.avatar
+        }
+        if(coverImageUpdatedLocalPath){
            coverImageUpdatedPath = await uploadOnCloudinary(coverImageUpdatedLocalPath)
-
-        let updatedUser = {}
+           oldCoverImage = req.user.coverImage
+        }
+        
+        
+ 
         if(avatarUpdatedPath && coverImageUpdatedPath){
             updatedUser = await User.findByIdAndUpdate(req.user._id, 
               {
@@ -428,8 +433,17 @@ const updateAvatarOrCoverImage = asyncHandler(
               ).select('-password -refreshToken')
         }
         else{
-            throw new ApiError(500, "error while uploading images")
+            throw new ApiError(500, "error while updating")
         }
+
+        if(oldAvatar)
+            {
+                deleteFileOfCloudinary(oldAvatar)
+            }
+        if(oldCoverImage)
+            {
+                deleteFileOfCloudinary(oldCoverImage)
+            }
         
         res.status(200).json(
             new ApiResponse(200, updatedUser, "successfully updated images")
