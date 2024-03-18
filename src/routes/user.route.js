@@ -1,5 +1,6 @@
 import { Router } from "express";
-import {loginUser, logoutUser, refreshAccessToken, registerUser, changeCurrentPassword, getCurretUser, updateUserDetails, updateAvatarOrCoverImage} from "../controllers/user.controller.js";
+import {loginUser, logoutUser, refreshAccessToken, registerUser, changeCurrentPassword, getCurretUser, updateUserDetails, updateAvatarOrCoverImage, getuserChannelProfile, getWatchHistory} from "../controllers/user.controller.js";
+import { subscribe, unSubscribe } from "../controllers/subscription.controller.js";
 import {upload} from "../middlewares/multer.middleware.js"
 import verifyJWT from "../middlewares/auth.middleware.js";
 
@@ -27,9 +28,10 @@ router.route("/changeCurrentPassword").post(verifyJWT, changeCurrentPassword)
 
 router.route("/getCurrentUser").post(verifyJWT, getCurretUser)
 
-router.route("/updateUserDetails").post(verifyJWT, updateUserDetails)
+router.route("/updateUserDetails").patch(verifyJWT, updateUserDetails)     
+//The PATCH method in HTTP is used to apply partial modifications to a resource. It updates only the fields or properties that are included in the request payload, leaving the rest of the resource unchanged.
 
-router.route("/updateAvatarOrCoverImage").post(upload.fields([
+router.route("/updateAvatarOrCoverImage").patch(upload.fields([
     {
         name: "avatar",
         maxCount: 1
@@ -39,4 +41,16 @@ router.route("/updateAvatarOrCoverImage").post(upload.fields([
         maxCount: 1
     }
 ]), verifyJWT, updateAvatarOrCoverImage)
+
+
+router.route("/getUserChannelProfile/:userName").get(verifyJWT, getuserChannelProfile)
+
+router.route("/getWatchHistory").get(verifyJWT, getWatchHistory)
+
+
+
+router.route("/subscribe").post(verifyJWT, subscribe)
+router.route("/unSubscribe").post(verifyJWT, unSubscribe)
+
+
 export default router
