@@ -1,3 +1,4 @@
+import { ApiError } from "./ApiError.js"
 // // const asyncHandler = (fn) => {() => {}}  
 // const asyncHandler = (fn) => async (req, res, next) => {
 //     try{
@@ -16,6 +17,6 @@ const asyncHandler = (requestHandler) => {
         Promise.resolve(requestHandler(req, res, next)).
         catch((err) => next(err))
     }
-}
+}  
 
 export {asyncHandler}

@@ -1,6 +1,5 @@
 import { Router } from "express";
 import {loginUser, logoutUser, refreshAccessToken, registerUser, changeCurrentPassword, getCurretUser, updateUserDetails, updateAvatarOrCoverImage, getuserChannelProfile, getWatchHistory} from "../controllers/user.controller.js";
-import { subscribe, unSubscribe } from "../controllers/subscription.controller.js";
 import {upload} from "../middlewares/multer.middleware.js"
 import verifyJWT from "../middlewares/auth.middleware.js";
 
@@ -47,10 +46,6 @@ router.route("/getUserChannelProfile/:userName").get(verifyJWT, getuserChannelPr
 
 router.route("/getWatchHistory").get(verifyJWT, getWatchHistory)
 
-
-
-router.route("/subscribe").post(verifyJWT, subscribe)
-router.route("/unSubscribe").post(verifyJWT, unSubscribe)
 
 
 export default router
