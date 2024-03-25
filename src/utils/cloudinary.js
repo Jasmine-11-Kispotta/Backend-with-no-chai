@@ -1,5 +1,7 @@
 import {v2 as cloudinary} from 'cloudinary'  //sevice where we will store files, images and many more
 import fs from 'fs'    //for managing file system in nodejs
+import { asyncHandler } from './asyncHandler';
+import { error } from 'console';
 
 
           
@@ -43,4 +45,21 @@ const deleteFileOfCloudinary = async(fileUrl) =>{
     })
 }
 
-export {uploadOnCloudinary, deleteFileOfCloudinary}
+const getViewsAndDurationofVideo = async(fileUrl)=>{
+    const publicId = fileUrl?.split('/').pop().split('.')[0]
+    cloudinary.api.resource(publicId, {resource_type: 'video', derived: true})
+    .then(response =>{
+        const duration = response.duration
+        console.log(`duration: ${duration}`)
+
+        const views = response.views
+        console.log(`views: ${views}`)
+
+        return {views, duration}
+    })
+    .catch(error =>{
+        console.log(`Error while getting details of video`)
+    })
+}
+
+export {uploadOnCloudinary, deleteFileOfCloudinary, getViewsAndDurationofVideo}
