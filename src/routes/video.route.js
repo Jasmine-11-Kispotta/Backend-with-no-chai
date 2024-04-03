@@ -15,7 +15,7 @@ videoRouter.route("/uploadAVideo").post(upload.fields([
     }
 ]), verifyJWT, uploadAVideo)
 
-videoRouter.route("/getVideoById").post(verifyJWT, getVideoById)
+videoRouter.route("/getVideoById").get(verifyJWT, getVideoById)
 
 videoRouter.route("/updateVideoDetails").post(upload.fields([
     {

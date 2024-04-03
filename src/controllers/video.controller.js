@@ -1,5 +1,5 @@
-import { ApiError } from "../utils/ApiError";
-import { asyncHandler } from "../utils/asyncHandler";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import { deleteFileOfCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Video } from "../models/video.models.js";
 import { User } from "../models/user.models.js";
@@ -29,21 +29,22 @@ const uploadAVideo = asyncHandler(
         
           const user = await User.findById(req.user._id).select("-password -refreshToken")
 
-          const {views, duration} = getViewsAndDurationofVideo(videoPath)
-
+          const {views, duration} = getViewsAndDurationofVideo(videoPath.url)
+          console.log(`here+ ${user}`)
           const createVideoObject = Video.create(
             {
-                videoFile: videoPath,
-                thumbnail: thumbnailPath,
+                videoFile: videoPath.url,
+                thumbnail: thumbnailPath.url,
                 owner: user._id,
                 title: title,
                 description: description || "",
-                duration: duration,
+                duration:duration,
                 views: views,
                 isPublished: false
             }
           )
           
+          console.log(createVideoObject._id)
           const createdVideoObj = await Video.findById(createVideoObject._id)
           if(!createdVideoObj){
             throw new ApiError(500, "something went wrong while uploading files")
