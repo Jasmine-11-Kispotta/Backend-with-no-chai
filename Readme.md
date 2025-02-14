@@ -1,8 +1,3 @@
-# learning backend with chai or code
+# Video Sharing System
 
-This project was developed in my journey of learning backend from Hitesh Choudhary at chai or code(a youtube channel).
-The data model to be followed for this project:-
-- [Model Link](https://app.eraser.io/workspace/YtPqZ1VogxGy1jzIDkzj)
-
-
-In my code i have used the term 'main user' in comments because i have created objects named 'User' at many places. So to differentiate between my main customer from whom i get request and to whom i have to send response, i have used the term 'main user'.
+This project provides a platform  which enables user to upload, share and view videos.The frontend of the system is built using React. The server-side is developed using nodejs and mongodb database is used for storing user information. Cloudinary storage service is utilized for storing video data. The system supports features like user authentication using JSON web token, video metadata management, and delivering a smooth and engaging experience for users.
